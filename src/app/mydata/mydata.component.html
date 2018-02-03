@@ -1,6 +1,8 @@
-<data-table [data]="dataToSend">
-    <column [value]="'name'" [header]="'Name'"></column>
-    <column [value]="'age'" [header]="'Age'"></column>
-    <column [value]="'contact'" [header]="'Contact'"></column>
-    <column [value]="'department'" [header]="'Department'"></column>
-</data-table>
+<div style="padding: 50px;">
+    <data-table [data]="dataToSend">
+        <column [value]="'name'" [header]="'Name'" [sort]="'true'"></column>
+        <column [value]="'age'" [header]="'Age'" [sort]="'true'"></column>
+        <column [value]="'contact'" [header]="'Contact'" [sort]="'true'"></column>
+        <column [value]="'department'" [header]="'Department'" [sort]="'true'"></column>
+    </data-table>
+</div>

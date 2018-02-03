@@ -8,10 +8,19 @@ import { ColumnComponent } from '../column/column.component';
 })
 export class DataTableComponent implements OnInit {
 
-  constructor() { }
+  tableData:Object[] = [];
 
-  @Input() data;
+  perPageCountDropdown = [10,20,50];  
+
+  @Input() set data(value:any){
+    this.tableData = value;
+  }
+  
   columns: ColumnComponent[] = [];
+
+  constructor() {
+  
+  }
 
   ngOnInit() {
     

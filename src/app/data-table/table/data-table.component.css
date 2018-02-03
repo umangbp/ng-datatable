@@ -1,3 +1,19 @@
 th:hover {
     cursor: pointer;
 }
+
+.datatable-padd {
+    padding: 2%;
+}
+
+.perPageCount {
+    padding: 0 0 1% 0;
+}
+
+.datatable_length {
+    padding-left: 0% !important;
+}
+
+.clear-padding {
+    padding: 0% !important;
+}
