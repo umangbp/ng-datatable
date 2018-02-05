@@ -9,28 +9,33 @@ import { ColumnComponent } from '../column/column.component';
 export class DataTableComponent implements OnInit {
 
   columns: ColumnComponent[] = [];     // columns array
-  tableData:Object[] = [];                // holds table data
+  sourceData:Object[] = [];                // holds data received
+  tableData:Object[] = [];                  // holds records that are currently shown;
   perPageCountDropdown = [10,20,50,100];   // array for per page records dropdown  
   pageArray:number[] = [];         // array for generating pages
   first:number = 1;                    // starting page no of displayed pagination
   last:number = 5;                     // last page no of displayed pagination 
+
+  showingFrom:number;               // record number from which record is shown in page
+  showingTo:number                  // record number to which record is shown in page
 
   // configuration variables
   totalRecords:number = 0;         // total records count
   totalPages: number = 0;          // total page count
   currentPage: number = 1;         // current page no
   perPageRecords:number = 10;      // per page records  
+  pagination_pages:number = 5;
 
   // Input property to receive data
   @Input() set data(value:any){
     
-    this.tableData = value;
+    this.sourceData = value;
     
-    if(this.tableData !== undefined){
-      this.totalRecords = this.tableData.length;
-      
+    if(this.sourceData !== undefined){
+      this.totalRecords = this.sourceData.length;
       // calculating no of pages from total record count
       this.calculatePages(this.totalRecords);
+      this.fillRecordsToBeDisplayed();
     }
     
   }
@@ -61,7 +66,11 @@ export class DataTableComponent implements OnInit {
    * Callback function when per page count changes
    */
   perPageCountChange(){
-    alert(this.perPageRecords);
+   this.calculatePages(this.totalRecords);
+   this.currentPage = Math.ceil(this.showingFrom / this.perPageRecords)
+    
+    // start from here
+  
   }
 
   /**
@@ -69,7 +78,7 @@ export class DataTableComponent implements OnInit {
    * @param recordCount 
    */
   calculatePages(recordCount:number){
-    this.totalPages = Math.ceil(this.totalRecords / this.perPageRecords);
+    this.totalPages = Math.ceil(recordCount / this.perPageRecords);
     this.generatePagination();
   }
 
@@ -91,7 +100,6 @@ export class DataTableComponent implements OnInit {
         this.pageArray.push(i);
       }
     }
-
   }
 
   /**
@@ -103,6 +111,7 @@ export class DataTableComponent implements OnInit {
       this.first = this.first - 5;
       this.generatePagination();
       this.currentPage = this.first;
+      this.fillRecordsToBeDisplayed();
     }
   }
 
@@ -115,6 +124,7 @@ export class DataTableComponent implements OnInit {
       this.last = this.last + 5;
       this.generatePagination();
       this.currentPage = this.first;
+      this.fillRecordsToBeDisplayed();
     }
   }
 
@@ -123,7 +133,35 @@ export class DataTableComponent implements OnInit {
    * @param page 
    */
   onPageChange(page:number){
+
     this.currentPage = page;
+    this.fillRecordsToBeDisplayed();
+  }
+
+  /**
+   * Function to fill records needed to be displayed on table
+   */
+  fillRecordsToBeDisplayed(){
+
+    this.showingFrom = ((this.currentPage - 1) * this.perPageRecords);
+    this.showingTo = this.showingFrom + this.perPageRecords;
+
+    this.tableData = [];
+
+    // if the showingTo count is more than record count then set it to max
+    if(this.showingTo > this.totalRecords){
+      this.showingTo = this.totalRecords;
+    }
+
+    // if the showingTo count is less than zero count then set it to max
+    if(this.showingFrom < 0){
+      this.showingFrom = 0;
+    }
+
+    for(var i = this.showingFrom; i < this.showingTo; i++){
+      this.tableData.push(this.sourceData[i]);
+    }
+
   }
 
 }
