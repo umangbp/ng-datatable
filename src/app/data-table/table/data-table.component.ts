@@ -10,37 +10,49 @@ export class DataTableComponent implements OnInit {
 
   columns: ColumnComponent[] = [];     // columns array
   sourceData:Object[] = [];                // holds data received
+  
   tableData:Object[] = [];                  // holds records that are currently shown;
-  perPageCountDropdown = [10,20,50,100];   // array for per page records dropdown  
-  pageArray:number[] = [];         // array for generating pages
-  first:number = 1;                    // starting page no of displayed pagination
-  last:number = 5;                     // last page no of displayed pagination 
-
-  showingFrom:number;               // record number from which record is shown in page
-  showingTo:number                  // record number to which record is shown in page
-
+  
+  perPageCountDropdown:Array<number> = [10,20,50,100];   // array for per page records dropdown  
+  
   // configuration variables
   totalRecords:number = 0;         // total records count
   totalPages: number = 0;          // total page count
   currentPage: number = 1;         // current page no
   perPageRecords:number = 10;      // per page records  
-  pagination_pages:number = 5;
+  pagesToDisplay:number = 5;
+  
+  // arrays for holding visible pages and visible records index
+  pageArray:Array<number> = [];    
+  visibleRecords:Array<number> = [];    
+
+  // variables for holding start page and end page of current block
+  startPage:number;
+  endPage:number;
+
+  // variables for holding current record and end record index
+  startRecord:number= 0;
+  endRecord:number = 0;
+  
+  // object for holding search terms
+  searchTerms = {}
 
   // Input property to receive data
   @Input() set data(value:any){
     
-    this.sourceData = value;
-    
-    if(this.sourceData !== undefined){
-      this.totalRecords = this.sourceData.length;
-      // calculating no of pages from total record count
-      this.calculatePages(this.totalRecords);
-      this.fillRecordsToBeDisplayed();
+    if(value !== undefined){
+
+      this.sourceData = value;
+      this.tableData = this.sourceData;
+      this.totalRecords = this.tableData.length;
+
+      // function to initialize grid
+      this.initializeGrid();
+
     }
-    
+
   }
   
-
   /**
    * Default class constructor
    */
@@ -51,7 +63,30 @@ export class DataTableComponent implements OnInit {
    * OnInit lifecycle call
    */
   ngOnInit() {
-    
+
+  }
+
+  ngAfterContentInit()	{
+
+    this.columns.forEach(column => {
+      this.searchTerms[column.value] = ''
+    });
+
+  }
+
+  /**
+   * Function to initialize grid
+   */
+  initializeGrid(page:number = 1){
+
+
+    this.filterRecords(this.currentPage, this.perPageRecords);
+
+    //total pages
+    this.totalPages = this.calculatePages(this.totalRecords, this.perPageRecords);
+
+    // generate pagination
+    this.generatePagination(page);
   }
 
   /**
@@ -63,104 +98,115 @@ export class DataTableComponent implements OnInit {
   }
 
   /**
-   * Callback function when per page count changes
+   * Function to calculate pages
    */
-  perPageCountChange(){
-   this.calculatePages(this.totalRecords);
-   this.currentPage = Math.ceil(this.showingFrom / this.perPageRecords)
-    
-    // start from here
-  
+  calculatePages(recordCount:number,recordsPerPage:number){
+    return Math.ceil(recordCount/recordsPerPage);
   }
 
   /**
-   * Function for calculating the pages
-   * @param recordCount 
+   * Function to generate pagination
+   * @param startingPage 
    */
-  calculatePages(recordCount:number){
-    this.totalPages = Math.ceil(recordCount / this.perPageRecords);
-    this.generatePagination();
-  }
+  generatePagination(startingPage:number){
 
-  /**
-   * Function contains logic for generating pagination
-   */
-  generatePagination(){ 
+    if(startingPage > 0 && startingPage <= this.totalPages){
 
-    // clearing the pageArray to hold next block of pages
-    this.pageArray = [];
+      this.pageArray = [];
 
-    for( var i = this.first; i <= this.last; i++){  
-      
-      if(i > this.totalPages){
-        this.last = i;
-        break;
-      }
-      else{
+      for(var i = startingPage; i <= this.totalPages && i < startingPage + this.pagesToDisplay; i++){
         this.pageArray.push(i);
       }
+
+      // calculating first and last page that need to be displayed
+      this.startPage = startingPage;
+      this.endPage = this.pageArray[this.pageArray.length - 1];
+
     }
   }
 
   /**
-   * Callback when clicked on prev in pagination
+   * Function for filling records
+   * @param page 
+   * @param recordsPerPage 
    */
-  prev(){
-    if(this.first !== 1 && this.first - 5 > 0){
-      this.last = this.first - 1;
-      this.first = this.first - 5;
-      this.generatePagination();
-      this.currentPage = this.first;
-      this.fillRecordsToBeDisplayed();
+  filterRecords(page:number, recordsPerPage:number){
+
+    this.visibleRecords = [];
+
+    this.startRecord = ((page - 1) * this.perPageRecords) + 1;    
+    this.endRecord = this.startRecord + parseInt(this.perPageRecords.toString()) - 1;
+    
+    if(this.endRecord > this.totalRecords){
+      this.endRecord = this.totalRecords;
     }
+
+    for(var i = this.startRecord; i <= this.endRecord; i++){
+      this.visibleRecords.push(i);
+    }
+
   }
 
   /**
-   * Callback function to handle next click pagination 
+   * Function to move to previous pages block
    */
-  next(){
-    if(this.last <= this.totalPages && this.last + 5 <= this.totalPages){
-      this.first = this.last + 1;
-      this.last = this.last + 5;
-      this.generatePagination();
-      this.currentPage = this.first;
-      this.fillRecordsToBeDisplayed();
-    }
+  previousBlock(){
+
+    this.currentPage = this.currentPage - this.pagesToDisplay
+    this.generatePagination(this.currentPage);
+    this.filterRecords(this.currentPage, this.perPageRecords);
   }
 
   /**
-   * Page change event
+   * Function to move to next pages block
+   */
+  nextBlock(){
+    this.currentPage = this.endPage + 1;
+    this.generatePagination(this.currentPage);
+    this.filterRecords(this.currentPage, this.perPageRecords);
+  }
+
+  /**
+   * Function to handle page change
    * @param page 
    */
   onPageChange(page:number){
-
     this.currentPage = page;
-    this.fillRecordsToBeDisplayed();
+    this.filterRecords(this.currentPage, this.perPageRecords);
   }
 
   /**
-   * Function to fill records needed to be displayed on table
+   * Function to handle per page record count change
+   * @param event 
    */
-  fillRecordsToBeDisplayed(){
+  onPerPageRecordsCountChange(event){
+    
+    var updated_page_location:number = Math.ceil(this.startRecord/this.perPageRecords);
+    
+    this.startRecord = 0;
+    this.endRecord = 0;
+    
+    this.currentPage = 1;
 
-    this.showingFrom = ((this.currentPage - 1) * this.perPageRecords);
-    this.showingTo = this.showingFrom + this.perPageRecords;
+    // calculate update pagination block (i.e in which block updated page resides)
+    var page_block = Math.ceil(updated_page_location / this.pagesToDisplay)
 
-    this.tableData = [];
+    var first_page_of_block = ((page_block - 1) * this.pagesToDisplay) + 1;
+    
+    this.currentPage = updated_page_location;
 
-    // if the showingTo count is more than record count then set it to max
-    if(this.showingTo > this.totalRecords){
-      this.showingTo = this.totalRecords;
-    }
+    // reinitialize the grid
+    this.initializeGrid(first_page_of_block);
 
-    // if the showingTo count is less than zero count then set it to max
-    if(this.showingFrom < 0){
-      this.showingFrom = 0;
-    }
+  }
 
-    for(var i = this.showingFrom; i < this.showingTo; i++){
-      this.tableData.push(this.sourceData[i]);
-    }
+  onSearch(){
+
+    console.log(this.searchTerms);
+
+    this.tableData.filter((item) => {
+      //console.log(item);
+    })
 
   }
 

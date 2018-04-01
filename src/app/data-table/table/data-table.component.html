@@ -7,7 +7,7 @@
             <div class="col-sm-12 col-md-6 datatable_length">
                 <span>Show </span>
                 <label>
-                    <select class="form-control form-control-sm" (change)="perPageCountChange()" [(ngModel)]="perPageRecords">
+                    <select class="form-control form-control-sm" (change)="onPerPageRecordsCountChange($event)" [(ngModel)]="perPageRecords">
                             <option *ngFor="let count of perPageCountDropdown" value="{{count}}">{{count}}</option>
                     </select>
                 </label>
@@ -22,6 +22,7 @@
                 <table class="table table-bordered table-hover">
                     <thead>
                         <tr>
+                            <th>#</th>
                             <th><input type="checkbox" class="checkbox checkbox-primary"></th>
                             <th *ngFor="let column of columns" id="{{column.value}}">
                                 <div>
@@ -31,17 +32,19 @@
                         </tr>
                         <tr>
                             <th></th>
+                            <th></th>
                             <th *ngFor="let column of columns" id="{{column.value}}">
                                 <div *ngIf="column.sort=='true'">
-                                    <input style="display: block" type="text" placeholder="Search {{column.header}}" id="search_{{column.value}}">
+                                    <input style="display: block" type="text" placeholder="Search {{column.header}}" id="search_{{column.value}}" (keyup)="onSearch()" [(ngModel)]="searchTerms[column.value]">
                                 </div>
                             </th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let row of tableData">
+                        <tr *ngFor="let row of visibleRecords">
+                            <td>{{row}}</td>
                             <td><input type="checkbox" class="checkbox checkbox-primary"></td>
-                            <td *ngFor="let column of columns">{{row[column.value]}}</td>
+                            <td *ngFor="let column of columns">{{ tableData[row-1][column.value] }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -52,19 +55,19 @@
         <!-- pagination and other footer controls -->
         <div class="row">
             <div class="col-sm-12 col-md-6 clear-padding">
-                <span>Showing {{showingFrom + 1}} to {{showingTo}} of {{totalRecords}} enteries</span>
+                <span>Showing {{startRecord}} to {{endRecord}} of total {{totalRecords}} enteries</span>
             </div>
             <div class="col-sm-12 col-md-6 clear-padding">
                 <div class="float-right">
                     <ul class="pagination">
-                        <li class="page-item" id="prev" (click)="prev()"><a class="page-link"><i class="fa fa-angle-double-left"></i></a></li>
+                        <li class="page-item" *ngIf="startPage > 1" id="prev" (click)="previousBlock()"><a class="page-link"><i class="fa fa-angle-double-left"></i></a></li>
                         <ng-container *ngFor="let item of pageArray">
                             <li class="page-item" [ngClass]="item == currentPage ? 'active' : ''" id="{{item}}" (click)="onPageChange(item)"><a class="page-link">{{item}}</a></li>
                         </ng-container>
-                        <li class="page-item" id="next" (click)="next()"><a class="page-link"><i class="fa fa-angle-double-right"></i></a></li>
+                        <li class="page-item" *ngIf="endPage < totalPages" id="next" (click)="nextBlock()"><a class="page-link"><i class="fa fa-angle-double-right"></i></a></li>
                     </ul>
                     <div>
-                        Showing {{first}} to {{last}} of total {{totalPages}} pages
+                        Showing {{startPage}} to {{endPage}} of total {{totalPages}} pages
                     </div>
                 </div>
             </div>
