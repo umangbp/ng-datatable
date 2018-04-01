@@ -10,7 +10,7 @@ export class ColumnComponent implements OnInit {
 
   @Input() value;
   @Input() header;
-  @Input() sort;
+  @Input() search;
 
   constructor(dataTableComponent: DataTableComponent) {
     dataTableComponent.addColumn(this);

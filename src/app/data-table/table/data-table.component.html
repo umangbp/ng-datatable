@@ -34,17 +34,22 @@
                             <th></th>
                             <th></th>
                             <th *ngFor="let column of columns" id="{{column.value}}">
-                                <div *ngIf="column.sort=='true'">
+                                <div *ngIf="column.search=='true'">
                                     <input style="display: block" type="text" placeholder="Search {{column.header}}" id="search_{{column.value}}" (keyup)="onSearch()" [(ngModel)]="searchTerms[column.value]">
                                 </div>
                             </th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody *ngIf="totalRecords > 0">
                         <tr *ngFor="let row of visibleRecords">
                             <td>{{row}}</td>
                             <td><input type="checkbox" class="checkbox checkbox-primary"></td>
                             <td *ngFor="let column of columns">{{ tableData[row-1][column.value] }}</td>
+                        </tr>
+                    </tbody>
+                    <tbody *ngIf="totalRecords <= 0">
+                        <tr style="text-align: center">
+                            <td [attr.colspan]="columns.length + 2"> No Record Found </td>
                         </tr>
                     </tbody>
                 </table>
@@ -58,7 +63,7 @@
                 <span>Showing {{startRecord}} to {{endRecord}} of total {{totalRecords}} enteries</span>
             </div>
             <div class="col-sm-12 col-md-6 clear-padding">
-                <div class="float-right">
+                <div class="float-right" *ngIf="totalPages > 1">
                     <ul class="pagination">
                         <li class="page-item" *ngIf="startPage > 1" id="prev" (click)="previousBlock()"><a class="page-link"><i class="fa fa-angle-double-left"></i></a></li>
                         <ng-container *ngFor="let item of pageArray">
@@ -75,3 +80,4 @@
         <!-- pagination and other footer controls ends -->
     </div>
 </div>
+<!--  -->

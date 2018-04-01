@@ -80,7 +80,7 @@ export class DataTableComponent implements OnInit {
   initializeGrid(page:number = 1){
 
 
-    this.filterRecords(this.currentPage, this.perPageRecords);
+    this.fillRecords(this.currentPage, this.perPageRecords);
 
     //total pages
     this.totalPages = this.calculatePages(this.totalRecords, this.perPageRecords);
@@ -126,21 +126,26 @@ export class DataTableComponent implements OnInit {
   }
 
   /**
-   * Function for filling records
+   * Function for filling records (generating array which show element index which are to be displayed)
    * @param page 
    * @param recordsPerPage 
    */
-  filterRecords(page:number, recordsPerPage:number){
+  fillRecords(page:number, recordsPerPage:number){
 
-    this.visibleRecords = [];
+    // emptying existing object
+    this.visibleRecords = []; 
 
+    // finding index of starting record to be displayed
     this.startRecord = ((page - 1) * this.perPageRecords) + 1;    
-    this.endRecord = this.startRecord + parseInt(this.perPageRecords.toString()) - 1;
     
+    // finding index to ending record to be displayed
+    this.endRecord = this.startRecord + parseInt(this.perPageRecords.toString()) - 1;
+
     if(this.endRecord > this.totalRecords){
       this.endRecord = this.totalRecords;
     }
 
+    // generating array of indexes between start and end records
     for(var i = this.startRecord; i <= this.endRecord; i++){
       this.visibleRecords.push(i);
     }
@@ -154,7 +159,7 @@ export class DataTableComponent implements OnInit {
 
     this.currentPage = this.currentPage - this.pagesToDisplay
     this.generatePagination(this.currentPage);
-    this.filterRecords(this.currentPage, this.perPageRecords);
+    this.fillRecords(this.currentPage, this.perPageRecords);
   }
 
   /**
@@ -163,7 +168,7 @@ export class DataTableComponent implements OnInit {
   nextBlock(){
     this.currentPage = this.endPage + 1;
     this.generatePagination(this.currentPage);
-    this.filterRecords(this.currentPage, this.perPageRecords);
+    this.fillRecords(this.currentPage, this.perPageRecords);
   }
 
   /**
@@ -172,7 +177,7 @@ export class DataTableComponent implements OnInit {
    */
   onPageChange(page:number){
     this.currentPage = page;
-    this.filterRecords(this.currentPage, this.perPageRecords);
+    this.fillRecords(this.currentPage, this.perPageRecords);
   }
 
   /**
@@ -204,10 +209,45 @@ export class DataTableComponent implements OnInit {
 
     console.log(this.searchTerms);
 
-    this.tableData.filter((item) => {
-      //console.log(item);
+    // applying filter function on each item
+    this.tableData = this.sourceData.filter((item) => {
+      
+      var matchFound = true;
+
+      // iterating on earch 
+      this.columns.forEach(column => {
+        
+        // search only on columns for which search value is true
+        if(column.search == 'true'){
+
+          // search only on columns for which search term is not blank
+          if(this.searchTerms[column.value] !== ''){
+
+            // if match not found
+            if(item[column.value].toString().toLowerCase().indexOf(this.searchTerms[column.value].toLowerCase()) == -1){
+              matchFound = false;
+            }
+          }
+        }
+
+      });
+
+      if(matchFound){
+        return item;
+      }
+
     })
 
+    // updating total records count
+    this.totalRecords = this.tableData.length;
+    
+    // updating current page
+    this.currentPage = 1;
+    
+    // re-initializing the grid
+    this.initializeGrid(1);
+    
+    
   }
 
 }
