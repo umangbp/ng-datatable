@@ -1,8 +1,8 @@
 <div style="padding: 50px;">
-    <data-table [data]="dataToSend">
-        <column [value]="'name'" [header]="'Name'" [search]="'true'"></column>
-        <column [value]="'age'" [header]="'Age'" [search]="'true'"></column>
-        <column [value]="'contact'" [header]="'Contact'" [search]="'true'"></column>
-        <column [value]="'department'" [header]="'Department'" [search]="'true'"></column>
+    <data-table [data]="dataToSend" [title]="'Datatable'">
+        <column [value]="'name'" [header]="'Name'" [sort]="true" [search]="true"></column>
+        <column [value]="'age'" [header]="'Age'" [sort]="true" [search]="true"></column>
+        <column [value]="'contact'" [header]="'Contact'" [sort]="true" [search]="true"></column>
+        <column [value]="'department'" [header]="'Department'" [sort]="true" [search]="true"></column>
     </data-table>
 </div>

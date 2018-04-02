@@ -35,7 +35,8 @@ export class DataTableComponent implements OnInit {
   endRecord:number = 0;
   
   // object for holding search terms
-  searchTerms = {}
+  searchTerms = {};
+  sortStatus = {};
 
   // Input property to receive data
   @Input() set data(value:any){
@@ -52,6 +53,8 @@ export class DataTableComponent implements OnInit {
     }
 
   }
+
+  @Input() title;
   
   /**
    * Default class constructor
@@ -69,7 +72,17 @@ export class DataTableComponent implements OnInit {
   ngAfterContentInit()	{
 
     this.columns.forEach(column => {
-      this.searchTerms[column.value] = ''
+      if(column.search === true){
+        this.searchTerms[column.value] = ''
+      }
+
+      if(column.sort === true){
+        this.sortStatus[column.value] = {
+          sortType: '',
+          sortClass: 'fa fa-sort'
+        }
+      }
+
     });
 
   }
@@ -205,9 +218,10 @@ export class DataTableComponent implements OnInit {
 
   }
 
+  /**
+   * Function for searching records
+   */
   onSearch(){
-
-    console.log(this.searchTerms);
 
     // applying filter function on each item
     this.tableData = this.sourceData.filter((item) => {
@@ -218,7 +232,7 @@ export class DataTableComponent implements OnInit {
       this.columns.forEach(column => {
         
         // search only on columns for which search value is true
-        if(column.search == 'true'){
+        if(column.search === true){
 
           // search only on columns for which search term is not blank
           if(this.searchTerms[column.value] !== ''){
@@ -246,8 +260,71 @@ export class DataTableComponent implements OnInit {
     
     // re-initializing the grid
     this.initializeGrid(1);
+      
+  }
+
+  /**
+   * Function to sorting table data
+   * @param column 
+   */
+  onSortStatusChange(column){
     
+    // changing sort icons 
+    if(this.sortStatus[column].sortType == ''){
+      this.sortStatus[column].sortType = 'ASC';
+      this.sortStatus[column].sortClass = 'fa fa-sort-asc';
+    }
+    else if(this.sortStatus[column].sortType == 'ASC'){
+      this.sortStatus[column].sortType = 'DESC';
+      this.sortStatus[column].sortClass = 'fa fa-sort-desc';
+    }
+    else{
+      this.sortStatus[column].sortType = 'ASC';
+      this.sortStatus[column].sortClass = 'fa fa-sort-asc';  
+    }
+
+
+    if(this.sortStatus[column].sortType == 'ASC'){
+      this.tableData = this.sortAsc(this.tableData, column);
+    }
+    else{
+      this.tableData = this.sortDesc(this.tableData, column);
+    }
+
     
+  } 
+
+  sortAsc(data, column){
+
+    var sortedData = data.sort((obj1:any, obj2:any) => {
+        if(obj1[column] < obj2[column]){
+          return -1
+        }
+        else if(obj1[column] > obj2[column]){
+          return 1
+        }
+        else{
+          return 0;
+        }
+    })
+
+    return sortedData;
+  }
+
+  sortDesc(data,column){
+    var sortedData = data.sort((obj1:any, obj2:any) => {
+      if(obj1[column] > obj2[column]){
+        return -1
+      }
+      else if(obj1[column] < obj2[column]){
+        return 1
+      }
+      else{
+        return 0;
+      }
+    })
+
+    return sortedData;
   }
 
 }

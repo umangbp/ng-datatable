@@ -1,5 +1,7 @@
 <div class="card">
-    <div class="card-header">Datatable</div>
+    <div class="card-header">
+        <span *ngIf="title !== undefined && title !== ''">{{title}}</span>
+    </div>
     <div class="card-body datatable-padd">
 
         <!-- row for table header -->
@@ -13,7 +15,9 @@
                 </label>
                 <span> records</span>
             </div>
-            <div class="col-sm-12 col-md-6"></div>
+            <div class="col-sm-12 col-md-6">
+
+            </div>
         </div>
         <!-- row for table header ends-->
         <!-- table data -->
@@ -25,8 +29,11 @@
                             <th>#</th>
                             <th><input type="checkbox" class="checkbox checkbox-primary"></th>
                             <th *ngFor="let column of columns" id="{{column.value}}">
-                                <div>
+                                <div style="float: left;">
                                     {{column.header}}
+                                </div>
+                                <div *ngIf="column.sort === true" style="float: right;">
+                                    <i [className]="sortStatus[column.value].sortClass" aria-hidden="true" (click)="onSortStatusChange(column.value)"></i>
                                 </div>
                             </th>
                         </tr>
@@ -34,8 +41,8 @@
                             <th></th>
                             <th></th>
                             <th *ngFor="let column of columns" id="{{column.value}}">
-                                <div *ngIf="column.search=='true'">
-                                    <input style="display: block" type="text" placeholder="Search {{column.header}}" id="search_{{column.value}}" (keyup)="onSearch()" [(ngModel)]="searchTerms[column.value]">
+                                <div *ngIf="column.search===true">
+                                    <input class="form-control" style="display: block" type="text" placeholder="Search {{column.header}}" id="search_{{column.value}}" (keyup)="onSearch()" [(ngModel)]="searchTerms[column.value]">
                                 </div>
                             </th>
                         </tr>
