@@ -1,27 +1,22 @@
-<div class="card">
-    <div class="card-header">
-        <span *ngIf="title !== undefined && title !== ''">{{title}}</span>
-    </div>
-    <div class="card-body datatable-padd">
+<div class="datatable-padd col-xs-12 col-sm-12 col-md-12 col-lg-12">
 
-        <!-- row for table header -->
-        <div class="row">
-            <div class="col-sm-12 col-md-6 datatable_length">
-                <span>Show </span>
-                <label>
+    <!-- row for table header -->
+    <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <span>Show </span>
+            <label>
                     <select class="form-control form-control-sm" (change)="onPerPageRecordsCountChange($event)" [(ngModel)]="perPageRecords">
                             <option *ngFor="let count of perPageCountDropdown" value="{{count}}">{{count}}</option>
                     </select>
                 </label>
-                <span> records</span>
-            </div>
-            <div class="col-sm-12 col-md-6">
-
-            </div>
+            <span> records</span>
         </div>
-        <!-- row for table header ends-->
-        <!-- table data -->
-        <div class="row">
+    </div>
+    <!-- row for table header ends-->
+
+    <!-- table data -->
+    <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
             <div class="table-responsive">
                 <table class="table table-bordered table-hover">
                     <thead>
@@ -36,6 +31,7 @@
                                     <i [className]="sortStatus[column.value].sortClass" aria-hidden="true" (click)="onSortStatusChange(column.value)"></i>
                                 </div>
                             </th>
+                            <th *ngIf="actions !== undefined && actions?.length > 0">Actions</th>
                         </tr>
                         <tr>
                             <th></th>
@@ -45,13 +41,18 @@
                                     <input class="form-control" style="display: block" type="text" placeholder="Search {{column.header}}" id="search_{{column.value}}" (keyup)="onSearch()" [(ngModel)]="searchTerms[column.value]">
                                 </div>
                             </th>
+                            <th *ngIf="actions !== undefined && actions?.length > 0"></th>
                         </tr>
                     </thead>
                     <tbody *ngIf="totalRecords > 0">
-                        <tr *ngFor="let row of visibleRecords">
+                        <tr *ngFor="let row of visibleRecords" (click)="emitRowClickEvent(tableData[row - 1])">
                             <td>{{row}}</td>
                             <td><input type="checkbox" class="checkbox checkbox-primary"></td>
                             <td *ngFor="let column of columns">{{ tableData[row-1][column.value] }}</td>
+                            <td *ngIf="actions !== undefined && actions?.length > 0" style="text-align: center">
+                                <button type="button" class="btn btn-secondary" *ngIf="actions.includes('EDIT')"><i class="fa fa-edit"></i></button>
+                                <button type="button" class="btn btn-danger" *ngIf="actions.includes('DELETE')"><i class="fa fa-trash"></i></button>
+                            </td>
                         </tr>
                     </tbody>
                     <tbody *ngIf="totalRecords <= 0">
@@ -62,29 +63,32 @@
                 </table>
             </div>
         </div>
-        <!-- table data ends -->
+    </div>
+    <!-- table data ends -->
 
-        <!-- pagination and other footer controls -->
-        <div class="row">
-            <div class="col-sm-12 col-md-6 clear-padding">
+    <!-- pagination and other footer controls -->
+    <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <!-- <div class="col-sm-12 col-md-6 clear-padding">
                 <span>Showing {{startRecord}} to {{endRecord}} of total {{totalRecords}} enteries</span>
-            </div>
-            <div class="col-sm-12 col-md-6 clear-padding">
-                <div class="float-right" *ngIf="totalPages > 1">
+            </div> -->
+            <div class="clear-padding pull-right">
+                <div *ngIf="totalPages > 1">
                     <ul class="pagination">
-                        <li class="page-item" *ngIf="startPage > 1" id="prev" (click)="previousBlock()"><a class="page-link"><i class="fa fa-angle-double-left"></i></a></li>
+                        <li class="page-item"><a class="page-link" [ngClass]="startPage > 1 ? 'not-disabled' : 'disabled'" id="prev" (click)="previousBlock()"><i class="fa fa-angle-double-left"></i></a></li>
                         <ng-container *ngFor="let item of pageArray">
                             <li class="page-item" [ngClass]="item == currentPage ? 'active' : ''" id="{{item}}" (click)="onPageChange(item)"><a class="page-link">{{item}}</a></li>
                         </ng-container>
-                        <li class="page-item" *ngIf="endPage < totalPages" id="next" (click)="nextBlock()"><a class="page-link"><i class="fa fa-angle-double-right"></i></a></li>
+                        <li class="page-item"><a class="page-link" [ngClass]="endPage < totalPages ? 'not-disabled' : 'disabled'" id="next" (click)="nextBlock()"><i class="fa fa-angle-double-right"></i></a></li>
                     </ul>
                     <div>
-                        Showing {{startPage}} to {{endPage}} of total {{totalPages}} pages
+                        <span class="pull-right">Showing {{startPage}} to {{endPage}} of total {{totalPages}} pages</span>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- pagination and other footer controls ends -->
     </div>
+    <!-- pagination and other footer controls ends -->
 </div>
+
 <!--  -->

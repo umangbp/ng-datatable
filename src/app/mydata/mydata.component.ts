@@ -21,4 +21,8 @@ export class MydataComponent implements OnInit {
     })
   }
 
+  onRowSelect(event){
+    console.log(event);
+  }
+
 }

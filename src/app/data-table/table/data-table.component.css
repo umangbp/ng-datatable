@@ -10,10 +10,6 @@ th:hover {
     padding: 0 0 1% 0;
 }
 
-.datatable_length {
-    padding-left: 0% !important;
-}
-
 .clear-padding {
     padding: 0% !important;
 }
@@ -21,3 +17,10 @@ th:hover {
 li a:hover {
     cursor: pointer;
 }
+
+.disabled {
+    pointer-events: none;
+    background-color: #f5f5f5 !important
+}
+
+.not-disabled {}
